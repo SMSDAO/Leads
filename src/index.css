@@ -60,73 +60,73 @@
 /* Primary Container Class: flash-glow-card */
 .flash-glow-card {
   position: relative;
-  background: rgba(13, 17, 30, 0.72);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 1.25rem;
+  background: rgba(10, 14, 28, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.65), 0 0 20px -6px rgba(168, 85, 247, 0.2);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.75), 0 0 24px -6px rgba(168, 85, 247, 0.22);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
 .flash-glow-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 16px 45px -8px rgba(0, 0, 0, 0.8), 0 0 32px -4px rgba(168, 85, 247, 0.35);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.85), 0 0 36px -4px rgba(168, 85, 247, 0.4);
 }
 
 /* Cycling flash-glow-card (Dynamic Rainbow Glow) */
 .flash-glow-card-rainbow {
-  animation: neonColorCycle 12s infinite ease-in-out;
+  animation: neonColorCycle 10s infinite ease-in-out;
 }
 
-/* Dedicated Multi-Color Neon Border Classes */
+/* Dedicated Multi-Color Neon Border Classes (Purple, Orange, Red, Green, Yellow) */
 .glow-border-purple {
-  border: 1px solid rgba(168, 85, 247, 0.45);
-  box-shadow: 0 0 24px -4px rgba(168, 85, 247, 0.3), inset 0 0 12px -2px rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 28px -4px rgba(168, 85, 247, 0.35), inset 0 0 14px -2px rgba(168, 85, 247, 0.16);
 }
 .glow-border-purple:hover {
-  border-color: rgba(192, 132, 252, 0.85);
-  box-shadow: 0 0 35px -2px rgba(168, 85, 247, 0.5), inset 0 0 18px -1px rgba(168, 85, 247, 0.2);
+  border-color: rgba(192, 132, 252, 0.9);
+  box-shadow: 0 0 42px -2px rgba(168, 85, 247, 0.6), inset 0 0 22px -1px rgba(168, 85, 247, 0.25);
 }
 
 .glow-border-orange {
-  border: 1px solid rgba(249, 115, 22, 0.45);
-  box-shadow: 0 0 24px -4px rgba(249, 115, 22, 0.3), inset 0 0 12px -2px rgba(249, 115, 22, 0.12);
+  border: 1px solid rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 28px -4px rgba(249, 115, 22, 0.35), inset 0 0 14px -2px rgba(249, 115, 22, 0.16);
 }
 .glow-border-orange:hover {
-  border-color: rgba(251, 146, 60, 0.85);
-  box-shadow: 0 0 35px -2px rgba(249, 115, 22, 0.5), inset 0 0 18px -1px rgba(249, 115, 22, 0.2);
+  border-color: rgba(251, 146, 60, 0.9);
+  box-shadow: 0 0 42px -2px rgba(249, 115, 22, 0.6), inset 0 0 22px -1px rgba(249, 115, 22, 0.25);
 }
 
 .glow-border-red {
-  border: 1px solid rgba(239, 68, 68, 0.45);
-  box-shadow: 0 0 24px -4px rgba(239, 68, 68, 0.3), inset 0 0 12px -2px rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 28px -4px rgba(239, 68, 68, 0.35), inset 0 0 14px -2px rgba(239, 68, 68, 0.16);
 }
 .glow-border-red:hover {
-  border-color: rgba(248, 113, 113, 0.85);
-  box-shadow: 0 0 35px -2px rgba(239, 68, 68, 0.5), inset 0 0 18px -1px rgba(239, 68, 68, 0.2);
+  border-color: rgba(248, 113, 113, 0.9);
+  box-shadow: 0 0 42px -2px rgba(239, 68, 68, 0.6), inset 0 0 22px -1px rgba(239, 68, 68, 0.25);
 }
 
 .glow-border-green {
-  border: 1px solid rgba(16, 185, 129, 0.45);
-  box-shadow: 0 0 24px -4px rgba(16, 185, 129, 0.3), inset 0 0 12px -2px rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 28px -4px rgba(16, 185, 129, 0.35), inset 0 0 14px -2px rgba(16, 185, 129, 0.16);
 }
 .glow-border-green:hover {
-  border-color: rgba(52, 211, 153, 0.85);
-  box-shadow: 0 0 35px -2px rgba(16, 185, 129, 0.5), inset 0 0 18px -1px rgba(16, 185, 129, 0.2);
+  border-color: rgba(52, 211, 153, 0.9);
+  box-shadow: 0 0 42px -2px rgba(16, 185, 129, 0.6), inset 0 0 22px -1px rgba(16, 185, 129, 0.25);
 }
 
 .glow-border-yellow {
-  border: 1px solid rgba(234, 179, 8, 0.45);
-  box-shadow: 0 0 24px -4px rgba(234, 179, 8, 0.3), inset 0 0 12px -2px rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.5);
+  box-shadow: 0 0 28px -4px rgba(234, 179, 8, 0.35), inset 0 0 14px -2px rgba(234, 179, 8, 0.16);
 }
 .glow-border-yellow:hover {
-  border-color: rgba(250, 204, 21, 0.85);
-  box-shadow: 0 0 35px -2px rgba(234, 179, 8, 0.5), inset 0 0 18px -1px rgba(234, 179, 8, 0.2);
+  border-color: rgba(250, 204, 21, 0.9);
+  box-shadow: 0 0 42px -2px rgba(234, 179, 8, 0.6), inset 0 0 22px -1px rgba(234, 179, 8, 0.25);
 }
 
-/* Flash Line across Top or Accents */
+/* Flash Line Across Top or Accents (Multi-color Neon Glow Runner) */
 .flash-line-cyber {
   position: relative;
   overflow: hidden;
@@ -136,18 +136,19 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 50%;
-  height: 2px;
+  width: 60%;
+  height: 2.5px;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    #a855f7 20%, 
-    #f97316 40%, 
-    #ef4444 60%, 
-    #10b981 80%, 
-    #eab308 95%, 
+    #a855f7 18%, 
+    #f97316 38%, 
+    #ef4444 58%, 
+    #10b981 78%, 
+    #eab308 92%, 
     transparent 100%
   );
-  animation: flashLineMove 4s infinite linear;
+  filter: drop-shadow(0 0 8px #a855f7);
+  animation: flashLineMove 3.5s infinite linear;
 }
 
 /* Glassmorphism Inputs & Buttons */

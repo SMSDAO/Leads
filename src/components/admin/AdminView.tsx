@@ -144,7 +144,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       </div>
 
       {/* Proxy Nodes Pool Management */}
-      <FlashGlowCard glowColor="none" className="p-6">
+      <FlashGlowCard glowColor="orange" withFlashLine className="p-6">
         <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
           <div className="flex items-center gap-2">
             <Server className="h-4 w-4 text-cyan-400" />
@@ -205,7 +205,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       </FlashGlowCard>
 
       {/* Users & Tiers Table */}
-      <FlashGlowCard glowColor="none" className="p-6">
+      <FlashGlowCard glowColor="purple" withFlashLine className="p-6">
         <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-purple-400" />

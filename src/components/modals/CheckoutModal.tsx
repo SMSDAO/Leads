@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Check, Sparkles, Shield, ArrowRight, Zap, CreditCard, Lock } from 'lucide-react';
 import { PRICING_TIERS, PlanTier } from '../../lib/stripe';
 import { FlashGlowCard } from '../common/FlashGlowCard';
@@ -21,6 +21,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [selectedTierId, setSelectedTierId] = useState<string>(initialTierId);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    if (initialTierId) {
+      setSelectedTierId(initialTierId);
+    }
+  }, [initialTierId, isOpen]);
 
   if (!isOpen) return null;
 

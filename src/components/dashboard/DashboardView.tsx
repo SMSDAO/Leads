@@ -20,19 +20,30 @@ import {
   FileSpreadsheet,
   Globe,
   Radio,
-  Server
+  Server,
+  Flame,
+  Zap,
+  Sliders
 } from 'lucide-react';
 import { BusinessLead, CrawlJob, ProxyNode, ScrapeLogEntry } from '../../types';
 import { FlashGlowCard } from '../common/FlashGlowCard';
 import { LeadDetailModal } from '../modals/LeadDetailModal';
+import { BulkEmailModal } from '../modals/BulkEmailModal';
 
 interface DashboardViewProps {
   leads: BusinessLead[];
   crawlJobs: CrawlJob[];
   proxyNodes: ProxyNode[];
-  onStartCrawl: (query: string, location: string) => void;
+  onStartCrawl: (query: string, location: string, depth?: number) => void;
   onDeleteLead: (id: string) => void;
   onAddToCampaign: (lead: BusinessLead) => void;
+  onBulkSendEmails?: (campaign: {
+    name: string;
+    subject: string;
+    body: string;
+    targetCount: number;
+    leads: BusinessLead[];
+  }) => void;
   activeCrawl: CrawlJob | null;
   crawlLogs: ScrapeLogEntry[];
 }
@@ -44,6 +55,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onStartCrawl,
   onDeleteLead,
   onAddToCampaign,
+  onBulkSendEmails,
   activeCrawl,
   crawlLogs,
 }) => {
@@ -55,6 +67,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [minRating, setMinRating] = useState<number>(0);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [inspectingLead, setInspectingLead] = useState<BusinessLead | null>(null);
+  const [bulkEmailModalOpen, setBulkEmailModalOpen] = useState(false);
+  const [scrapeDepth, setScrapeDepth] = useState<number>(15);
+  const [scrapeAllArea, setScrapeAllArea] = useState(false);
 
   // Quick preset pills
   const presets = [
@@ -80,11 +95,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return matchesSearch && matchesCategory && matchesEmail && matchesRating;
   });
 
+  const isAllFilteredSelected = filteredLeads.length > 0 && filteredLeads.every((l) => selectedLeadIds.includes(l.id));
+
   const toggleSelectAll = () => {
-    if (selectedLeadIds.length === filteredLeads.length) {
-      setSelectedLeadIds([]);
+    if (isAllFilteredSelected) {
+      setSelectedLeadIds((prev) => prev.filter((id) => !filteredLeads.some((l) => l.id === id)));
     } else {
-      setSelectedLeadIds(filteredLeads.map((l) => l.id));
+      setSelectedLeadIds((prev) => Array.from(new Set([...prev, ...filteredLeads.map((l) => l.id)])));
     }
   };
 
@@ -92,6 +109,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     setSelectedLeadIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
+  };
+
+  const handleDeleteLeadLocal = (id: string) => {
+    setSelectedLeadIds((prev) => prev.filter((item) => item !== id));
+    onDeleteLead(id);
   };
 
   // Export CSV
@@ -201,7 +223,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* Input Form */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mb-4">
-          <div className="md:col-span-6 relative">
+          <div className="md:col-span-5 relative">
             <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
               Target Query or Google Maps URL
             </label>
@@ -233,9 +255,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          <div className="md:col-span-2 flex items-end">
+          <div className="md:col-span-3 flex items-end">
             <button
-              onClick={() => onStartCrawl(searchQuery, locationQuery)}
+              onClick={() => onStartCrawl(searchQuery, locationQuery, scrapeAllArea ? 50 : scrapeDepth)}
               disabled={!!activeCrawl}
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 py-2.5 px-4 text-xs font-bold text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] transition-all disabled:opacity-50"
             >
@@ -247,9 +269,63 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               ) : (
                 <>
                   <Play className="h-4 w-4 fill-white" />
-                  <span>Launch Scrape</span>
+                  <span>
+                    Launch Scrape ({scrapeAllArea ? '50+ All Leads' : `${scrapeDepth} Leads`})
+                  </span>
                 </>
               )}
+            </button>
+          </div>
+        </div>
+
+        {/* Scrape Depth & Coverage Mode Selector */}
+        <div className="flex flex-wrap items-center justify-between gap-3 py-2 border-t border-white/5 mb-2 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1">
+              <Sliders className="h-3.5 w-3.5 text-cyan-400" />
+              Scrape Depth:
+            </span>
+            <div className="inline-flex rounded-lg border border-white/10 bg-slate-900/80 p-0.5">
+              {[
+                { label: '5 Leads', val: 5 },
+                { label: '15 Leads', val: 15 },
+                { label: '30 Leads', val: 30 },
+                { label: '50+ Leads', val: 50 },
+              ].map((d) => (
+                <button
+                  key={d.val}
+                  type="button"
+                  onClick={() => {
+                    setScrapeDepth(d.val);
+                    setScrapeAllArea(d.val === 50);
+                  }}
+                  className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
+                    scrapeDepth === d.val
+                      ? 'bg-purple-600 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setScrapeAllArea(!scrapeAllArea);
+                if (!scrapeAllArea) setScrapeDepth(50);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-semibold transition-all ${
+                scrapeAllArea
+                  ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                  : 'border-white/10 bg-slate-900/60 text-slate-300 hover:text-white'
+              }`}
+            >
+              <Zap className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Scrape All in Area (Deep Harvest Mode)</span>
             </button>
           </div>
         </div>
@@ -441,7 +517,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Leads Table Card */}
-      <FlashGlowCard glowColor="none" className="p-6">
+      <FlashGlowCard glowColor="purple" withFlashLine className="p-6">
         {/* Table Filter Controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-white/10">
           <div className="flex flex-wrap items-center gap-3">
@@ -472,7 +548,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               onClick={() => setOnlyVerifiedEmail(!onlyVerifiedEmail)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
                 onlyVerifiedEmail
-                  ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
+                  ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
                   : 'border-white/10 bg-slate-900/60 text-slate-300 hover:text-white'
               }`}
             >
@@ -481,7 +557,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Export & Bulk Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setBulkEmailModalOpen(true)}
+              className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-all"
+            >
+              <Send className="h-3.5 w-3.5" />
+              <span>Bulk Email ({selectedLeadIds.length > 0 ? selectedLeadIds.length : filteredLeads.length})</span>
+            </button>
+
             <button
               onClick={handleExportCSV}
               className="flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-semibold text-purple-300 hover:bg-purple-500/20 transition-all"
@@ -509,20 +593,38 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* Selected Rows Bulk Bar */}
         {selectedLeadIds.length > 0 && (
-          <div className="flex items-center justify-between rounded-xl bg-purple-600/20 border border-purple-500/40 p-3 my-4">
-            <span className="text-xs font-semibold text-purple-200">
-              {selectedLeadIds.length} {selectedLeadIds.length === 1 ? 'lead' : 'leads'} selected
-            </span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl bg-purple-600/20 border border-purple-500/40 p-3 my-4 backdrop-blur-md">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-purple-400 animate-ping" />
+              <span className="text-xs font-bold text-white">
+                {selectedLeadIds.length} {selectedLeadIds.length === 1 ? 'lead' : 'leads'} selected for bulk action
+              </span>
+            </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => {
-                  const leadToCampaign = leads.find((l) => l.id === selectedLeadIds[0]);
-                  if (leadToCampaign) onAddToCampaign(leadToCampaign);
-                }}
-                className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1 text-xs font-bold text-white hover:bg-purple-500"
+                onClick={() => setBulkEmailModalOpen(true)}
+                className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-all"
               >
-                <Send className="h-3 w-3" />
-                <span>Add to Campaign</span>
+                <Send className="h-3.5 w-3.5" />
+                <span>Bulk Email Selected ({selectedLeadIds.length})</span>
+              </button>
+              <button
+                onClick={() => {
+                  selectedLeadIds.forEach((id) => {
+                    const leadToCampaign = leads.find((l) => l.id === id);
+                    if (leadToCampaign) onAddToCampaign(leadToCampaign);
+                  });
+                  setSelectedLeadIds([]);
+                }}
+                className="flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-500/20 px-3 py-1.5 text-xs font-bold text-purple-200 hover:bg-purple-500/30"
+              >
+                <span>Add {selectedLeadIds.length} to Campaign</span>
+              </button>
+              <button
+                onClick={() => setSelectedLeadIds([])}
+                className="rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:text-white"
+              >
+                Clear
               </button>
             </div>
           </div>
@@ -536,7 +638,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <th className="p-3 w-10">
                   <input
                     type="checkbox"
-                    checked={selectedLeadIds.length > 0 && selectedLeadIds.length === filteredLeads.length}
+                    checked={isAllFilteredSelected}
                     onChange={toggleSelectAll}
                     className="rounded border-white/20 bg-slate-800 text-purple-600 focus:ring-0"
                   />
@@ -639,7 +741,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             <Send className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => onDeleteLead(lead.id)}
+                            onClick={() => handleDeleteLeadLocal(lead.id)}
                             className="rounded p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
                             title="Delete Lead"
                           >
@@ -664,6 +766,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           onAddToCampaign={onAddToCampaign}
         />
       )}
+
+      {/* Bulk Email Outreach Modal */}
+      <BulkEmailModal
+        isOpen={bulkEmailModalOpen}
+        selectedLeads={
+          selectedLeadIds.length > 0
+            ? leads.filter((l) => selectedLeadIds.includes(l.id))
+            : filteredLeads
+        }
+        onClose={() => setBulkEmailModalOpen(false)}
+        onSendBulkCampaign={(campaign) => {
+          if (onBulkSendEmails) {
+            onBulkSendEmails(campaign);
+          }
+          setSelectedLeadIds([]);
+        }}
+      />
     </div>
   );
 };

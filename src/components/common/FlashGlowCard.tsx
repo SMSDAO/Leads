@@ -52,7 +52,9 @@ export const FlashGlowCard: React.FC<FlashGlowCardProps> = ({
                       glowColor === 'orange' ? '#f97316' :
                       glowColor === 'red' ? '#ef4444' :
                       glowColor === 'green' ? '#10b981' :
-                      glowColor === 'yellow' ? '#eab308' : '#8b5cf6'
+                      glowColor === 'yellow' ? '#eab308' :
+                      glowColor === 'cyan' ? '#06b6d4' :
+                      glowColor === 'rainbow' ? '#ec4899' : '#8b5cf6'
         }}
       />
       <div className="relative z-10 h-full w-full">

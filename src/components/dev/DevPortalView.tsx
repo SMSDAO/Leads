@@ -112,25 +112,35 @@ export const DevPortalView: React.FC<DevPortalViewProps> = ({
     setNewKeyName('');
   };
 
+  const handleEndpointChange = (ep: string) => {
+    setTestEndpoint(ep);
+    if (ep === '/api/crawl') {
+      setTestPayload(JSON.stringify({ userId: 'usr_admin_gxq', links: ['https://www.google.com/maps/search/dental+implants+austin'], location: 'Austin, TX' }, null, 2));
+    } else if (ep === '/api/campaigns') {
+      setTestPayload(JSON.stringify({ userId: 'usr_admin_gxq', name: 'Q4 Dental Implants Pitch', subject: 'Quick question about {company}', body: 'Hi {name},\n\nNoticed your high local rating...', targetCount: 30 }, null, 2));
+    } else if (ep === '/api/leads/export') {
+      setTestPayload(JSON.stringify({ format: 'json', category: 'ALL', verifiedEmailOnly: true }, null, 2));
+    } else if (ep === '/api/keys') {
+      setTestPayload(JSON.stringify({ userId: 'usr_admin_gxq', name: 'Python Ingestion Worker' }, null, 2));
+    }
+  };
+
   const handleExecuteApiTest = () => {
     setIsExecuting(true);
     setTimeout(() => {
       setIsExecuting(false);
-      setApiResponse(
-        JSON.stringify(
-          {
-            success: true,
-            jobId: 'cuid_' + Math.random().toString(36).substring(2, 9),
-            status: 'PENDING',
-            proxyNodeAssigned: '198.51.100.42:8080 (US-East)',
-            estimatedDurationMs: 1450,
-            leadsQueued: 2,
-          },
-          null,
-          2
-        )
-      );
-    }, 450);
+      let resData: any = {};
+      if (testEndpoint === '/api/crawl') {
+        resData = { success: true, jobId: 'crw_' + Date.now(), status: 'RUNNING', activeProxy: '198.51.100.42:8080 (US-East)', leadsDiscovered: 15, estimatedCompletionTime: '2.4s' };
+      } else if (testEndpoint === '/api/campaigns') {
+        resData = { success: true, campaignId: 'cmp_' + Date.now(), status: 'DISPATCHED', recipientsQueued: 30, spamScore: '98/100 (Grade A+)', rfcHeadersInjected: ['List-Unsubscribe', 'Precedence: bulk'] };
+      } else if (testEndpoint === '/api/leads/export') {
+        resData = { success: true, format: 'json', totalRecordsExported: 42, exportTimestamp: new Date().toISOString(), downloadUrl: '/api/leads/export?token=gods_live_sk_exp' };
+      } else {
+        resData = { success: true, key: { id: 'key_' + Date.now(), name: 'Python Ingestion Worker', token: 'gods_live_sk_' + Math.random().toString(36).substring(2, 10), permissions: ['crawl:write', 'campaign:write'] } };
+      }
+      setApiResponse(JSON.stringify(resData, null, 2));
+    }, 380);
   };
 
   const handleSimulateWebhook = (eventType: string) => {
@@ -239,12 +249,24 @@ export const DevPortalView: React.FC<DevPortalViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live Endpoint Tester */}
         <FlashGlowCard glowColor="purple" className="p-6">
-          <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/10 mb-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Terminal className="h-4 w-4 text-purple-400" />
               API Sandbox Runner
             </h3>
-            <span className="text-[10px] text-purple-300 font-mono">POST {testEndpoint}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Route:</span>
+              <select
+                value={testEndpoint}
+                onChange={(e) => handleEndpointChange(e.target.value)}
+                className="glass-input px-2.5 py-1 text-xs text-purple-300 font-mono"
+              >
+                <option value="/api/crawl" className="bg-slate-900">POST /api/crawl</option>
+                <option value="/api/campaigns" className="bg-slate-900">POST /api/campaigns</option>
+                <option value="/api/leads/export" className="bg-slate-900">POST /api/leads/export</option>
+                <option value="/api/keys" className="bg-slate-900">POST /api/keys</option>
+              </select>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -366,7 +388,7 @@ export const DevPortalView: React.FC<DevPortalViewProps> = ({
       </FlashGlowCard>
 
       {/* TypeScript SDK Quickstart Snippet */}
-      <FlashGlowCard glowColor="none" className="p-6">
+      <FlashGlowCard glowColor="orange" withFlashLine className="p-6">
         <h3 className="text-sm font-bold text-white mb-2">TypeScript SDK Integration</h3>
         <pre className="rounded-xl border border-white/10 bg-black/70 p-4 font-mono text-xs text-slate-300 overflow-x-auto">
 {`import { GodsLeadClient } from '@gods/lead-engine';
