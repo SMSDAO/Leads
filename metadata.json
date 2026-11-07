@@ -1,0 +1,6 @@
+{
+  "name": "Gods Lead Engine",
+  "description": "Enterprise Cyber-Futuristic Lead Generation & Business Intelligence SaaS with proxy rotation, deep Google Maps scraping, and automated outreach campaigns.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

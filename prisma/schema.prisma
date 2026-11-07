@@ -1,0 +1,120 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  USER
+  DEVELOPER
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+model User {
+  id            String             @id @default(cuid())
+  name          String?
+  email         String             @unique
+  password      String
+  role          Role               @default(USER)
+  status        SubscriptionStatus @default(TRIAL)
+  stripeId      String?
+  trialEndsAt   DateTime           @default(dbgenerated("NOW() + INTERVAL '14 days'"))
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  crawls        CrawlJob[]
+  campaigns     EmailCampaign[]
+  apiKeys       ApiKey[]
+}
+
+model CrawlJob {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetUrl   String
+  location    String?
+  status      String         @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  totalFound  Int            @default(0)
+  retryCount  Int            @default(0)
+  maxRetries  Int            @default(3)
+  activeProxy String?
+  results     BusinessLead[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model BusinessLead {
+  id             String    @id @default(cuid())
+  crawlId        String
+  crawl          CrawlJob  @relation(fields: [crawlId], references: [id], onDelete: Cascade)
+  name           String
+  category       String?
+  address        String?
+  phone          String?
+  email          String?
+  website        String?
+  rating         Float?
+  reviewsCount   Int?
+  mapsUrl        String?
+  operatingHours String?
+  linkedinUrl    String?
+  facebookUrl    String?
+  twitterUrl     String?
+  tags           String[]  @default([])
+  verifiedEmail  Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+}
+
+model EmailCampaign {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  subject       String
+  body          String
+  status        String    @default("DRAFT") // DRAFT, SENDING, COMPLETED
+  sentCount     Int       @default(0)
+  targetCount   Int       @default(0)
+  openRate      Float?    @default(0)
+  clickRate     Float?    @default(0)
+  abTestEnabled Boolean   @default(false)
+  subjectB      String?
+  bodyB         String?
+  scheduleAt    DateTime?
+  rateLimitPerMinute Int  @default(120)
+  createdAt     DateTime  @default(now())
+}
+
+model ProxyNode {
+  id           String    @id @default(cuid())
+  host         String
+  port         Int
+  protocol     String    @default("http")
+  username     String?
+  password     String?
+  isActive     Boolean   @default(true)
+  latencyMs    Int?
+  location     String?
+  failureCount Int       @default(0)
+  lastFailedAt DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key        String    @unique
+  name       String
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+}
